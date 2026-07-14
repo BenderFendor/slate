@@ -14,9 +14,9 @@ Slate project files use the `.slate` suffix and contain UTF-8 JSON. The top-leve
 
 The `format` marker prevents arbitrary JSON from being accepted as a project. `version` controls compatibility. A reader must reject a project whose version is newer than the version it supports instead of attempting a partial load.
 
-Version 1 serializes the document dimensions, ordered layer stack, active layer identifier, color configuration, revision, current file path, unsaved marker, and optional selection mask. Layers preserve identifiers, names, visibility, opacity, blend mode, optional masks, lock state, and their typed content.
+Version 1 serializes the document dimensions, ordered layer stack, active layer identifier, color configuration, revision, and optional selection mask. Layers preserve identifiers, names, visibility, opacity, blend mode, optional masks, lock state, and their typed content.
 
-Runtime undo and redo commands are intentionally omitted. Loading a project starts a fresh history stack and marks the document clean.
+Runtime undo and redo commands are intentionally omitted. The machine-local source or destination path is cleared before serialization, and the serialized unsaved marker is normalized to `false`. Loading a project starts a fresh history stack, assigns the path selected by the user, and marks the document clean.
 
 ## Validation
 
