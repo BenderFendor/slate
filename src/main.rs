@@ -40,13 +40,15 @@ impl App {
 
         app.connect_activate(move |app| {
             let main_window = MainWindow::new(app);
+            crate::ui::hardening::install(&main_window);
             main_window.window.present();
         });
 
         app.connect_open(move |app, files, _hint| {
             let main_window = MainWindow::new(app);
+            crate::ui::hardening::install(&main_window);
             if let Some(path) = files.first().and_then(|file| file.path()) {
-                main_window.open_path(&path);
+                crate::ui::hardening::open_path(&main_window, &path);
             }
             main_window.window.present();
         });
