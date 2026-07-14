@@ -37,7 +37,7 @@ uninstall:
 	find assets/icons/hicolor/scalable/actions -maxdepth 1 -type f -printf '%f\n' | while read icon; do rm -f "$(DATADIR)/icons/hicolor/scalable/actions/$$icon"; done
 
 package:
-	./scripts/package-linux.sh
+	bash scripts/package-linux.sh
 
 clean:
 	cargo clean
