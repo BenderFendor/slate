@@ -2,10 +2,12 @@ mod command;
 mod filter;
 mod layer;
 mod mask;
+mod project;
 
 pub use command::*;
 pub use layer::*;
 pub use mask::*;
+pub use project::*;
 
 use serde::{Deserialize, Serialize};
 
