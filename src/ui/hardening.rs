@@ -70,7 +70,6 @@ pub fn open_path(editor: &MainWindow, path: &Path) {
     if let Err(error) = load_path(
         &editor.document,
         &editor.pipeline,
-        &editor.zoom,
         editor.canvas.widget(),
         path,
     ) {
@@ -83,7 +82,6 @@ fn replace_new_action(editor: &MainWindow) {
 
     let document = editor.document.clone();
     let pipeline = editor.pipeline.clone();
-    let zoom = editor.zoom.clone();
     let canvas = editor.canvas.widget().clone();
     let action = gio::SimpleAction::new("new", None);
     action.connect_activate(move |_, _| {
@@ -102,7 +100,6 @@ fn replace_new_action(editor: &MainWindow) {
         next.has_unsaved_changes = true;
         *document.borrow_mut() = next;
         *pipeline.borrow_mut() = EditPipeline::default();
-        *zoom.borrow_mut() = 1.0;
         canvas.queue_draw();
     });
     editor.window.add_action(&action);
@@ -114,11 +111,10 @@ fn replace_open_action(editor: &MainWindow) {
     let parent = editor.window.clone();
     let document = editor.document.clone();
     let pipeline = editor.pipeline.clone();
-    let zoom = editor.zoom.clone();
     let canvas = editor.canvas.widget().clone();
     let action = gio::SimpleAction::new("open", None);
     action.connect_activate(move |_, _| {
-        show_open_dialog(&parent, &document, &pipeline, &zoom, &canvas);
+        show_open_dialog(&parent, &document, &pipeline, &canvas);
     });
     editor.window.add_action(&action);
 }
@@ -159,7 +155,6 @@ fn show_open_dialog(
     parent: &adw::ApplicationWindow,
     document: &Rc<RefCell<Document>>,
     pipeline: &Rc<RefCell<EditPipeline>>,
-    zoom: &Rc<RefCell<f64>>,
     canvas: &gtk4::DrawingArea,
 ) {
     let filter = gtk4::FileFilter::new();
@@ -183,7 +178,6 @@ fn show_open_dialog(
     let parent_clone = parent.clone();
     let document = document.clone();
     let pipeline = pipeline.clone();
-    let zoom = zoom.clone();
     let canvas = canvas.clone();
     dialog.open(Some(parent), gio::Cancellable::NONE, move |result| {
         let Ok(file) = result else {
@@ -197,7 +191,7 @@ fn show_open_dialog(
             );
             return;
         };
-        if let Err(error) = load_path(&document, &pipeline, &zoom, &canvas, &path) {
+        if let Err(error) = load_path(&document, &pipeline, &canvas, &path) {
             show_error(&parent_clone, "Could not open file", &error);
         }
     });
@@ -206,7 +200,6 @@ fn show_open_dialog(
 fn load_path(
     document: &Rc<RefCell<Document>>,
     pipeline: &Rc<RefCell<EditPipeline>>,
-    zoom: &Rc<RefCell<f64>>,
     canvas: &gtk4::DrawingArea,
     path: &Path,
 ) -> Result<(), String> {
@@ -222,7 +215,7 @@ fn load_path(
     next.mark_saved();
     *document.borrow_mut() = next;
     *pipeline.borrow_mut() = EditPipeline::default();
-    queue_fit_to_screen(document, zoom, canvas);
+    canvas.queue_draw();
     log::info!("Opened {}", path.display());
     Ok(())
 }
@@ -302,26 +295,6 @@ fn default_project_name(document: &Document) -> String {
         .filter(|name| !name.is_empty())
         .unwrap_or("untitled");
     format!("{stem}.{PROJECT_EXTENSION}")
-}
-
-fn queue_fit_to_screen(
-    document: &Rc<RefCell<Document>>,
-    zoom: &Rc<RefCell<f64>>,
-    canvas: &gtk4::DrawingArea,
-) {
-    let document = document.clone();
-    let zoom = zoom.clone();
-    let canvas = canvas.clone();
-    glib::idle_add_local_once(move || {
-        let document = document.borrow();
-        let viewport_width = canvas.width().max(1) as f64;
-        let viewport_height = canvas.height().max(1) as f64;
-        let scale_x = viewport_width / document.canvas_width.max(1) as f64;
-        let scale_y = viewport_height / document.canvas_height.max(1) as f64;
-        *zoom.borrow_mut() = scale_x.min(scale_y).min(1.0).clamp(0.01, 64.0);
-        drop(document);
-        canvas.queue_draw();
-    });
 }
 
 fn install_title_watch(editor: &MainWindow) {

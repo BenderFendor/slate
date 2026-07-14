@@ -11,7 +11,11 @@ const TOOL_GROUPS: &[(ToolKind, &str, &str)] = &[
     (ToolKind::Crop, "Crop (C)", "slate-crop-symbolic"),
     (ToolKind::Brush, "Brush (B)", "slate-brush-symbolic"),
     (ToolKind::Eraser, "Eraser (E)", "slate-eraser-symbolic"),
-    (ToolKind::ColorPicker, "Color Picker (I)", "slate-pipette-symbolic"),
+    (
+        ToolKind::ColorPicker,
+        "Color Picker (I)",
+        "slate-pipette-symbolic",
+    ),
     (ToolKind::Zoom, "Zoom (Z)", "slate-zoom-symbolic"),
 ];
 

@@ -169,7 +169,7 @@ impl QuickEditPanel {
 
         let ratio_row = adw::ActionRow::new();
         ratio_row.set_title("Custom Aspect Ratio (W:H)");
-        
+
         let ratio_entry = gtk4::Entry::new();
         ratio_entry.set_valign(gtk4::Align::Center);
         ratio_row.add_suffix(&ratio_entry);
@@ -243,7 +243,7 @@ impl QuickEditPanel {
 
         let custom_resize_row = adw::ActionRow::new();
         custom_resize_row.set_title("Custom Size");
-        
+
         let custom_box = gtk4::Box::new(gtk4::Orientation::Horizontal, 6);
         custom_box.set_valign(gtk4::Align::Center);
 
@@ -273,8 +273,16 @@ impl QuickEditPanel {
             }
         };
 
-        w_entry.connect_activate(glib::clone!(#[strong] parse_custom, move |_| parse_custom()));
-        h_entry.connect_activate(glib::clone!(#[strong] parse_custom, move |_| parse_custom()));
+        w_entry.connect_activate(glib::clone!(
+            #[strong]
+            parse_custom,
+            move |_| parse_custom()
+        ));
+        h_entry.connect_activate(glib::clone!(
+            #[strong]
+            parse_custom,
+            move |_| parse_custom()
+        ));
 
         group.add(&custom_resize_row);
 

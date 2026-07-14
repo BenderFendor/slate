@@ -147,11 +147,7 @@ fn temporary_path_for(path: &Path) -> PathBuf {
     path.with_file_name(format!(".{file_name}.tmp"))
 }
 
-fn checked_pixel_len(
-    width: u32,
-    height: u32,
-    channels: usize,
-) -> Result<usize, ProjectError> {
+fn checked_pixel_len(width: u32, height: u32, channels: usize) -> Result<usize, ProjectError> {
     if width == 0 || height == 0 || width > MAX_DIMENSION || height > MAX_DIMENSION {
         return Err(ProjectError::Invalid(format!(
             "Invalid pixel dimensions {width}x{height}"
@@ -160,9 +156,7 @@ fn checked_pixel_len(
     (width as usize)
         .checked_mul(height as usize)
         .and_then(|pixels| pixels.checked_mul(channels))
-        .ok_or_else(|| {
-            ProjectError::Invalid("Pixel dimensions overflow memory limits".to_string())
-        })
+        .ok_or_else(|| ProjectError::Invalid("Pixel dimensions overflow memory limits".to_string()))
 }
 
 fn validate_document(document: &Document) -> Result<(), ProjectError> {
@@ -239,12 +233,7 @@ mod tests {
 
     fn sample_document() -> Document {
         let mut document = Document::new(2, 2);
-        document.add_layer(Layer::new_raster(
-            "Pixels",
-            2,
-            2,
-            vec![255; 2 * 2 * 4],
-        ));
+        document.add_layer(Layer::new_raster("Pixels", 2, 2, vec![255; 2 * 2 * 4]));
         document
     }
 
