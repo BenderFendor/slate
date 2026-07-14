@@ -15,8 +15,6 @@ jobs:
       RUST_BACKTRACE: 1
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: agent/finish-slate-image-editor
       - name: Install native dependencies
         run: |
           sudo apt-get update
@@ -29,38 +27,9 @@ jobs:
         with:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
-      - name: Apply compiler-driven source repairs
-        run: python3 scripts/apply-source-fixes.py
-      - name: Apply rustfmt in the runner
-        run: cargo fmt --all
-      - name: Preserve repaired source
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: repaired-rust-source
-          path: src
-          if-no-files-found: error
+      - name: Format
+        run: cargo fmt --all --check
       - name: Test
-        if: always()
-        shell: bash
-        run: |
-          set -o pipefail
-          cargo test --all-targets --all-features --locked 2>&1 | tee cargo-test.log
+        run: cargo test --all-targets --all-features --locked
       - name: Clippy
-        if: always()
-        shell: bash
-        run: |
-          set -o pipefail
-          cargo clippy --all-targets --all-features --locked -- -D warnings 2>&1 | tee cargo-clippy.log
-      - name: Preserve native diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: native-ci-diagnostics
-          path: |
-            cargo-test.log
-            cargo-clippy.log
-          if-no-files-found: warn
-      - name: Verify committed formatting
-        if: always()
-        run: git diff --exit-code -- '*.rs'
+        run: cargo clippy --all-targets --all-features --locked -- -D warnings
