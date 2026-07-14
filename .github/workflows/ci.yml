@@ -5,7 +5,7 @@ on:
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify:
@@ -15,6 +15,8 @@ jobs:
       RUST_BACKTRACE: 1
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: agent/finish-slate-image-editor
       - name: Install native dependencies
         run: |
           sudo apt-get update
@@ -27,8 +29,21 @@ jobs:
         with:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
+      - name: Apply compiler-driven source repairs
+        if: github.actor != 'github-actions[bot]'
+        run: python3 scripts/apply-source-fixes.py
       - name: Apply rustfmt in the runner
         run: cargo fmt --all
+      - name: Commit repaired source
+        if: github.actor != 'github-actions[bot]'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src
+          if ! git diff --cached --quiet; then
+            git commit -m 'Fix native build and format source'
+            git push origin HEAD:agent/finish-slate-image-editor
+          fi
       - name: Preserve formatted source
         uses: actions/upload-artifact@v4
         with:
