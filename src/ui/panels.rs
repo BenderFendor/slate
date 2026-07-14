@@ -249,25 +249,17 @@ impl RightPanels {
             nav_box
         };
 
-        let navigator_group = adw::PreferencesGroup::builder()
-            .title("Navigator")
-            .build();
+        let navigator_group = adw::PreferencesGroup::builder().title("Navigator").build();
         navigator_group.add(&navigator_page);
 
-        let props_group = adw::PreferencesGroup::builder()
-            .title("Properties")
-            .build();
+        let props_group = adw::PreferencesGroup::builder().title("Properties").build();
         props_group.add(&scrolled_properties);
 
-        let layers_group = adw::PreferencesGroup::builder()
-            .title("Layers")
-            .build();
+        let layers_group = adw::PreferencesGroup::builder().title("Layers").build();
         layers_group.add(&layers_page);
         layers_group.set_vexpand(true);
 
-        let history_group = adw::PreferencesGroup::builder()
-            .title("History")
-            .build();
+        let history_group = adw::PreferencesGroup::builder().title("History").build();
         history_group.add(&history_page);
 
         let scrolled_panels = gtk4::ScrolledWindow::new();
@@ -277,13 +269,11 @@ impl RightPanels {
         panels_vbox.set_margin_end(6);
         panels_vbox.set_margin_top(6);
         panels_vbox.set_margin_bottom(6);
-        
+
         panels_vbox.append(&navigator_group);
         panels_vbox.append(&props_group);
-        
-        let swatches_group = adw::PreferencesGroup::builder()
-            .title("Swatches")
-            .build();
+
+        let swatches_group = adw::PreferencesGroup::builder().title("Swatches").build();
         let swatch_grid = gtk4::FlowBox::new();
         swatch_grid.set_max_children_per_line(8);
         swatch_grid.set_selection_mode(gtk4::SelectionMode::None);
@@ -291,7 +281,7 @@ impl RightPanels {
         swatch_grid.set_margin_bottom(8);
         swatch_grid.set_margin_start(8);
         swatch_grid.set_margin_end(8);
-        
+
         let common_colors = [
             [0.0, 0.0, 0.0, 1.0], // Black
             [1.0, 1.0, 1.0, 1.0], // White
@@ -306,7 +296,7 @@ impl RightPanels {
             [0.5, 0.0, 1.0, 1.0], // Purple
             [0.0, 0.5, 1.0, 1.0], // Sky Blue
         ];
-        
+
         for c in common_colors {
             let btn = gtk4::Button::new();
             btn.add_css_class("flat");
@@ -333,7 +323,7 @@ impl RightPanels {
 
         panels_vbox.append(&layers_group);
         panels_vbox.append(&history_group);
-        
+
         scrolled_panels.set_child(Some(&panels_vbox));
         widget.append(&scrolled_panels);
 

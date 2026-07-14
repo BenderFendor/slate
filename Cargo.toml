@@ -2,7 +2,11 @@
 name = "slate"
 version = "0.1.0"
 edition = "2021"
-description = "A fast native Linux image editor with layers, masks, brushes, and filters"
+description = "A fast native Linux image editor with layers, masks, brushes, filters, and a versioned project format"
+license = "MIT"
+repository = "https://github.com/BenderFendor/slate"
+keywords = ["image-editor", "gtk4", "libadwaita", "linux"]
+categories = ["graphics", "multimedia::images"]
 
 [dependencies]
 gtk4 = { version = "0.11", features = ["v4_14"] }
@@ -20,3 +24,8 @@ pango = "0.22"
 glib = "0.22"
 gdk4 = "0.11"
 lru = "0.12"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"

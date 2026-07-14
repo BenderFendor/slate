@@ -226,11 +226,7 @@ fn pick_color_at(doc: &Document, img_x: f64, img_y: f64) -> Option<[f32; 4]> {
     }
 
     let mut pixels = vec![0u8; doc.canvas_width as usize * doc.canvas_height as usize * 4];
-    flatten_document_region_bgra(
-        doc,
-        PixelRect::new(x as u32, y as u32, 1, 1),
-        &mut pixels,
-    );
+    flatten_document_region_bgra(doc, PixelRect::new(x as u32, y as u32, 1, 1), &mut pixels);
 
     let idx = (y as usize * doc.canvas_width as usize + x as usize) * 4;
     let b = pixels[idx] as f32 / 255.0;
@@ -282,7 +278,8 @@ fn show_brush_popover(
     let hardness_label = gtk4::Label::new(Some("Hardness"));
     hardness_label.set_halign(gtk4::Align::Start);
     vbox.append(&hardness_label);
-    let hardness_adj = gtk4::Adjustment::new(*hardness.borrow() * 100.0, 0.0, 100.0, 1.0, 10.0, 0.0);
+    let hardness_adj =
+        gtk4::Adjustment::new(*hardness.borrow() * 100.0, 0.0, 100.0, 1.0, 10.0, 0.0);
     let hardness_scale = gtk4::Scale::new(gtk4::Orientation::Horizontal, Some(&hardness_adj));
     hardness_scale.set_hexpand(true);
     hardness_scale.set_draw_value(true);
@@ -490,12 +487,17 @@ fn paint_brush_dab(
                 let src_a = brush_color[3] * amount;
                 let dst_a = raster.data[idx + 3] as f32 / 255.0;
                 let out_a = src_a + dst_a * (1.0 - src_a);
-                
+
                 if out_a > 0.0 {
                     let blend = |s: f32, d: f32| (s * src_a + d * dst_a * (1.0 - src_a)) / out_a;
-                    raster.data[idx] = (blend(brush_color[0] * 255.0, raster.data[idx] as f32)).clamp(0.0, 255.0) as u8;
-                    raster.data[idx + 1] = (blend(brush_color[1] * 255.0, raster.data[idx + 1] as f32)).clamp(0.0, 255.0) as u8;
-                    raster.data[idx + 2] = (blend(brush_color[2] * 255.0, raster.data[idx + 2] as f32)).clamp(0.0, 255.0) as u8;
+                    raster.data[idx] = (blend(brush_color[0] * 255.0, raster.data[idx] as f32))
+                        .clamp(0.0, 255.0) as u8;
+                    raster.data[idx + 1] =
+                        (blend(brush_color[1] * 255.0, raster.data[idx + 1] as f32))
+                            .clamp(0.0, 255.0) as u8;
+                    raster.data[idx + 2] =
+                        (blend(brush_color[2] * 255.0, raster.data[idx + 2] as f32))
+                            .clamp(0.0, 255.0) as u8;
                     raster.data[idx + 3] = (out_a * 255.0).clamp(0.0, 255.0) as u8;
                 }
             }
@@ -698,13 +700,13 @@ impl CanvasWidget {
             .description("Drag a file here or choose one from disk to start editing")
             .icon_name("insert-image-symbolic")
             .build();
-        
+
         let empty_open = gtk4::Button::builder()
             .label("Open Image")
             .halign(gtk4::Align::Center)
             .css_classes(vec!["suggested-action".to_string(), "pill".to_string()])
             .build();
-        
+
         empty_state.set_child(Some(&empty_open));
 
         {
@@ -1114,7 +1116,7 @@ impl CanvasWidget {
             cr.set_source_rgba(1.0, 1.0, 1.0, 1.0);
             cr.set_line_width(1.0);
             cr.set_dash(&[4.0, 4.0], 0.0);
-            
+
             for (i, p) in lasso_path.iter().enumerate() {
                 if i == 0 {
                     cr.move_to(p.0, p.1);
@@ -1600,10 +1602,14 @@ impl CanvasWidget {
                     return;
                 }
                 let t = *tool.borrow();
-                if t != ToolKind::Brush && t != ToolKind::Eraser && t != ToolKind::ColorPicker && t != ToolKind::Lasso {
+                if t != ToolKind::Brush
+                    && t != ToolKind::Eraser
+                    && t != ToolKind::ColorPicker
+                    && t != ToolKind::Lasso
+                {
                     return;
                 }
-                
+
                 if t == ToolKind::Lasso {
                     lasso_path.borrow_mut().clear();
                     lasso_path.borrow_mut().push((gx, gy));
@@ -1621,11 +1627,11 @@ impl CanvasWidget {
                 let is_eraser = t == ToolKind::Eraser;
                 let radius = (*bs.borrow() / 2.0).max(0.5);
                 *before_layer.borrow_mut() = d.active_layer_id.and_then(|id| d.layer(id).cloned());
-                
+
                 if t == ToolKind::ColorPicker {
-                    if let Some((ix, iy)) = canvas_to_image(
-                        &d, z, off_x, off_y, canvas_w, canvas_h, gx, gy,
-                    ) {
+                    if let Some((ix, iy)) =
+                        canvas_to_image(&d, z, off_x, off_y, canvas_w, canvas_h, gx, gy)
+                    {
                         if let Some(color) = pick_color_at(&d, ix, iy) {
                             *bc.borrow_mut() = color;
                         }
@@ -1678,11 +1684,16 @@ impl CanvasWidget {
                         let mut mask = Mask::new("Selection", d.canvas_width, d.canvas_height);
                         mask.kind = crate::document::MaskKind::Selection;
                         mask.data.fill(0); // Start with nothing selected
-                        
+
                         // Use cairo to fill the path
-                        let mut surface = cairo::ImageSurface::create(cairo::Format::ARgb32, d.canvas_width as i32, d.canvas_height as i32).unwrap();
+                        let mut surface = cairo::ImageSurface::create(
+                            cairo::Format::ARgb32,
+                            d.canvas_width as i32,
+                            d.canvas_height as i32,
+                        )
+                        .unwrap();
                         let cr = cairo::Context::new(&surface).unwrap();
-                        
+
                         cr.set_source_rgba(1.0, 1.0, 1.0, 1.0);
                         let z = *zoom.borrow();
                         let off_x = *ox.borrow();
@@ -1693,7 +1704,11 @@ impl CanvasWidget {
                         let ch = alloc.height() as f64;
 
                         for (i, p) in path.iter().enumerate() {
-                            let Some((ix, iy)) = canvas_to_image(&d, z, off_x, off_y, cw, ch, p.0, p.1) else { continue; };
+                            let Some((ix, iy)) =
+                                canvas_to_image(&d, z, off_x, off_y, cw, ch, p.0, p.1)
+                            else {
+                                continue;
+                            };
                             if i == 0 {
                                 cr.move_to(ix, iy);
                             } else {
@@ -1702,7 +1717,7 @@ impl CanvasWidget {
                         }
                         cr.close_path();
                         cr.fill().ok();
-                        
+
                         // Copy from surface to mask data
                         let data = surface.data().unwrap();
                         for i in 0..mask.data.len() {
@@ -1734,7 +1749,15 @@ impl CanvasWidget {
                 if t != ToolKind::Brush && t != ToolKind::Eraser {
                     return;
                 }
-                show_brush_popover(widget.upcast_ref(), x, y, &size, &hardness, &opacity, &color);
+                show_brush_popover(
+                    widget.upcast_ref(),
+                    x,
+                    y,
+                    &size,
+                    &hardness,
+                    &opacity,
+                    &color,
+                );
             });
         }
         self.widget.add_controller(secondary_click);
@@ -1762,10 +1785,14 @@ impl CanvasWidget {
                 return;
             }
             let t = *motion_tool.borrow();
-            if t != ToolKind::Brush && t != ToolKind::Eraser && t != ToolKind::ColorPicker && t != ToolKind::Lasso {
+            if t != ToolKind::Brush
+                && t != ToolKind::Eraser
+                && t != ToolKind::ColorPicker
+                && t != ToolKind::Lasso
+            {
                 return;
             }
-            
+
             if t == ToolKind::Lasso {
                 motion_lasso_path.borrow_mut().push((gx, gy));
                 motion_widget.queue_draw();
@@ -1782,9 +1809,9 @@ impl CanvasWidget {
             let mut d = motion_doc.borrow_mut();
 
             if t == ToolKind::ColorPicker {
-                if let Some((ix, iy)) = canvas_to_image(
-                    &d, z, off_x, off_y, canvas_w, canvas_h, gx, gy,
-                ) {
+                if let Some((ix, iy)) =
+                    canvas_to_image(&d, z, off_x, off_y, canvas_w, canvas_h, gx, gy)
+                {
                     if let Some(color) = pick_color_at(&d, ix, iy) {
                         *motion_bc.borrow_mut() = color;
                     }
@@ -1875,13 +1902,35 @@ mod tests {
         };
         let idx = (4 * 8 + 4) * 4;
 
-        paint_brush_dab(&mut raster, 4.0, 4.0, false, 2.0, 1.0, 1.0, 1.0);
+        paint_brush_dab(
+            &mut raster,
+            None,
+            4.0,
+            4.0,
+            false,
+            2.0,
+            1.0,
+            1.0,
+            1.0,
+            [0.0, 0.0, 0.0, 1.0],
+        );
         assert_eq!(raster.data[idx], 0);
         assert_eq!(raster.data[idx + 1], 0);
         assert_eq!(raster.data[idx + 2], 0);
         assert_eq!(raster.data[idx + 3], 255);
 
-        paint_brush_dab(&mut raster, 4.0, 4.0, true, 2.0, 0.5, 1.0, 1.0);
+        paint_brush_dab(
+            &mut raster,
+            None,
+            4.0,
+            4.0,
+            true,
+            2.0,
+            0.5,
+            1.0,
+            1.0,
+            [0.0, 0.0, 0.0, 1.0],
+        );
         assert!(raster.data[idx + 3] < 255);
     }
 
@@ -1890,10 +1939,10 @@ mod tests {
         let mut mask = Mask::new("Mask", 8, 8);
         let idx = 4 * 8 + 4;
 
-        paint_mask_dab(&mut mask, 4.0, 4.0, false, 2.0, 1.0, 1.0, 1.0);
+        paint_mask_dab(&mut mask, None, 4.0, 4.0, false, 2.0, 1.0, 1.0, 1.0);
         assert_eq!(mask.data[idx], 0);
 
-        paint_mask_dab(&mut mask, 4.0, 4.0, true, 2.0, 0.5, 1.0, 1.0);
+        paint_mask_dab(&mut mask, None, 4.0, 4.0, true, 2.0, 0.5, 1.0, 1.0);
         assert!(mask.data[idx] > 0);
     }
 
@@ -1908,7 +1957,20 @@ mod tests {
         doc.add_layer(layer);
 
         paint_brush_at(
-            &mut doc, 1.0, 0.0, 0.0, 8.0, 8.0, 4.0, 4.0, false, 2.0, 1.0, 1.0, 1.0,
+            &mut doc,
+            1.0,
+            0.0,
+            0.0,
+            8.0,
+            8.0,
+            4.0,
+            4.0,
+            false,
+            2.0,
+            1.0,
+            1.0,
+            1.0,
+            [0.0, 0.0, 0.0, 1.0],
         );
 
         let layer = doc.layer(layer_id).unwrap();
@@ -1929,7 +1991,20 @@ mod tests {
         let before = doc.layer(layer_id).unwrap().clone();
 
         paint_brush_at(
-            &mut doc, 1.0, 0.0, 0.0, 8.0, 8.0, 4.0, 4.0, false, 2.0, 1.0, 1.0, 1.0,
+            &mut doc,
+            1.0,
+            0.0,
+            0.0,
+            8.0,
+            8.0,
+            4.0,
+            4.0,
+            false,
+            2.0,
+            1.0,
+            1.0,
+            1.0,
+            [0.0, 0.0, 0.0, 1.0],
         );
         commit_prepaint_layer_state(&mut doc, before);
 

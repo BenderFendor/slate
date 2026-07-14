@@ -18,7 +18,7 @@ pub fn upscale_document(doc: &mut Document, scale_factor: f64) -> Result<(), Box
             )?;
 
             let upscaled = ops::resize(&img, scale_factor)?;
-            
+
             raster.width = upscaled.get_width() as u32;
             raster.height = upscaled.get_height() as u32;
             raster.data = upscaled.image_write_to_memory();

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Slate
+GenericName=Image Editor
+Comment=Edit raster images with layers, masks, brushes, and filters
+Exec=slate %F
+Icon=com.slate.editor
+Terminal=false
+Type=Application
+Categories=Graphics;RasterGraphics;GTK;
+MimeType=application/x-slate-project;image/png;image/jpeg;image/webp;image/tiff;image/gif;image/bmp;
+StartupNotify=true
+StartupWMClass=com.slate.editor
+Keywords=image;photo;paint;draw;layers;mask;crop;

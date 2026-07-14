@@ -303,18 +303,11 @@ impl MainWindow {
             QuickEditPanel::new(document.clone(), pipeline.clone(), export_params.clone());
 
         let workspace_stack = adw::ViewStack::new();
-        let full_page = workspace_stack.add_titled(
-            &panels_widget,
-            Some("full"),
-            "Full Edit",
-        );
+        let full_page = workspace_stack.add_titled(&panels_widget, Some("full"), "Full Edit");
         full_page.set_icon_name(Some("format-justify-fill-symbolic"));
 
-        let quick_page = workspace_stack.add_titled(
-            quick_panel.widget(),
-            Some("quick"),
-            "Quick Edit",
-        );
+        let quick_page =
+            workspace_stack.add_titled(quick_panel.widget(), Some("quick"), "Quick Edit");
         quick_page.set_icon_name(Some("image-filter-vintage-symbolic"));
         workspace_stack.set_visible_child_name("full");
 
@@ -336,8 +329,14 @@ impl MainWindow {
             &workspace_stack,
         );
 
-        let header =
-            Self::create_header(&document, &pipeline, &export_params, &zoom, canvas.widget(), &workspace_stack);
+        let header = Self::create_header(
+            &document,
+            &pipeline,
+            &export_params,
+            &zoom,
+            canvas.widget(),
+            &workspace_stack,
+        );
 
         let (status, status_zoom, status_dims, status_output) =
             Self::create_status_bar(&zoom, &document, &pipeline);
@@ -1126,7 +1125,10 @@ impl MainWindow {
         }
 
         for (name, func) in [
-            ("flip-h", Self::flip_document_horizontal as fn(&mut Document)),
+            (
+                "flip-h",
+                Self::flip_document_horizontal as fn(&mut Document),
+            ),
             ("flip-v", Self::flip_document_vertical as fn(&mut Document)),
         ] {
             let doc = document.clone();
@@ -1145,7 +1147,10 @@ impl MainWindow {
             ("sharpen", Self::filter_sharpen as fn(&mut [u8], u32, u32)),
             ("noise", Self::filter_noise as fn(&mut [u8], u32, u32)),
             ("invert", Self::filter_invert as fn(&mut [u8], u32, u32)),
-            ("grayscale", Self::filter_grayscale as fn(&mut [u8], u32, u32)),
+            (
+                "grayscale",
+                Self::filter_grayscale as fn(&mut [u8], u32, u32),
+            ),
         ] {
             let doc = document.clone();
             let cw = canvas.clone();
@@ -1480,7 +1485,8 @@ impl MainWindow {
                     let src_idx = (src_y * raster.width * 4) as usize;
                     let dst_idx = (dst_y * raster.width * 4) as usize;
                     let len = (raster.width * 4) as usize;
-                    flipped[dst_idx..dst_idx + len].copy_from_slice(&raster.data[src_idx..src_idx + len]);
+                    flipped[dst_idx..dst_idx + len]
+                        .copy_from_slice(&raster.data[src_idx..src_idx + len]);
                 }
                 raster.data = flipped;
             }
@@ -1492,7 +1498,8 @@ impl MainWindow {
                     let src_idx = (src_y * mask.width) as usize;
                     let dst_idx = (dst_y * mask.width) as usize;
                     let len = mask.width as usize;
-                    flipped[dst_idx..dst_idx + len].copy_from_slice(&mask.data[src_idx..src_idx + len]);
+                    flipped[dst_idx..dst_idx + len]
+                        .copy_from_slice(&mask.data[src_idx..src_idx + len]);
                 }
                 mask.data = flipped;
             }
