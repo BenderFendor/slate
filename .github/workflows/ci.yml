@@ -1,0 +1,35 @@
+name: Native CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      RUST_BACKTRACE: 1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config \
+            libgtk-4-dev libadwaita-1-dev \
+            libvips-dev liblcms2-dev \
+            libcairo2-dev libpango1.0-dev
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Format
+        run: cargo fmt --check
+      - name: Test
+        run: cargo test --all-targets --all-features --locked
+      - name: Clippy
+        run: cargo clippy --all-targets --all-features --locked -- -D warnings
