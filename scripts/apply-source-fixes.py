@@ -26,7 +26,12 @@ hardening = replace_exact(
     "",
     expected=3,
 )
-hardening = replace_exact(hardening, "    let zoom = zoom.clone();\n", "")
+hardening = replace_exact(
+    hardening,
+    "    let zoom = zoom.clone();\n",
+    "",
+    expected=2,
+)
 hardening = replace_exact(
     hardening,
     "        if let Err(error) = load_path(&document, &pipeline, &zoom, &canvas, &path) {",
