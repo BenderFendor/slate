@@ -89,6 +89,7 @@ fn replace_new_action(editor: &MainWindow) {
     action.connect_activate(move |_, _| {
         let width = 1920;
         let height = 1080;
+        let replacement_revision = document.borrow().revision.wrapping_add(1);
         let mut next = Document::new(width, height);
         next.add_layer(Layer::new_raster(
             "Background",
@@ -96,6 +97,7 @@ fn replace_new_action(editor: &MainWindow) {
             height,
             vec![0; width as usize * height as usize * 4],
         ));
+        next.revision = replacement_revision;
         next.file_path = None;
         next.has_unsaved_changes = true;
         *document.borrow_mut() = next;
@@ -208,12 +210,14 @@ fn load_path(
     canvas: &gtk4::DrawingArea,
     path: &Path,
 ) -> Result<(), String> {
+    let replacement_revision = document.borrow().revision.wrapping_add(1);
     let mut next = if is_project_path(path) {
         load_project(path).map_err(|error| error.to_string())?
     } else {
         load_image_document(path)?
     };
 
+    next.revision = replacement_revision;
     next.file_path = Some(path.to_string_lossy().into_owned());
     next.mark_saved();
     *document.borrow_mut() = next;
@@ -224,7 +228,7 @@ fn load_path(
 }
 
 fn load_image_document(path: &Path) -> Result<Document, String> {
-    let image = image::open(path)
+    let image = ::image::open(path)
         .map_err(|error| format!("Failed to decode {}: {error}", path.display()))?
         .to_rgba8();
     let (width, height) = image.dimensions();
@@ -334,7 +338,11 @@ fn install_title_watch(editor: &MainWindow) {
             .and_then(|path| Path::new(path).file_name())
             .and_then(|name| name.to_str())
             .unwrap_or("Untitled");
-        let marker = if document.has_unsaved_changes { "● " } else { "" };
+        let marker = if document.has_unsaved_changes {
+            "● "
+        } else {
+            ""
+        };
         window.set_title(Some(&format!("{marker}{name} — Slate")));
         glib::ControlFlow::Continue
     });
@@ -348,6 +356,7 @@ fn audit_exposed_actions(window: &adw::ApplicationWindow) {
     }
 }
 
+#[allow(deprecated)]
 fn show_error(parent: &adw::ApplicationWindow, title: &str, detail: &str) {
     log::error!("{title}: {detail}");
     let dialog = gtk4::MessageDialog::builder()
