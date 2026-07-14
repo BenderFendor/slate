@@ -17,7 +17,7 @@ The repository originally contained a substantial but unfinished editor behind a
 - Flattened PNG, JPEG, and WebP export through the image pipeline
 - Versioned `.slate` project files that preserve layers, masks, selections, color configuration, and editable state
 - Validated project loading, bounded project-file size, malformed-pixel rejection, and atomic project writes
-- Open images or `.slate` projects from the file dialog, drag and drop, or command line
+- Open images through the file dialog, drag and drop, or command line; open `.slate` projects through File/Open or the command line
 - Native desktop entry, AppStream metadata, MIME registration, icons, install targets, release archives, CI, and tag-driven GitHub releases
 - No accounts, telemetry, mock data, cloud upload, or external runtime service
 
