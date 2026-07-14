@@ -24,7 +24,7 @@ hardening = replace_exact(
     hardening,
     "    zoom: &Rc<RefCell<f64>>,\n",
     "",
-    expected=2,
+    expected=3,
 )
 hardening = replace_exact(hardening, "    let zoom = zoom.clone();\n", "")
 hardening = replace_exact(
