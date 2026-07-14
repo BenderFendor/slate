@@ -34,7 +34,10 @@ impl fmt::Display for ProjectError {
             Self::Io(error) => write!(formatter, "I/O error: {error}"),
             Self::Json(error) => write!(formatter, "Invalid project JSON: {error}"),
             Self::UnsupportedVersion(version) => {
-                write!(formatter, "Project version {version} is newer than this Slate build")
+                write!(
+                    formatter,
+                    "Project version {version} is newer than this Slate build"
+                )
             }
             Self::Invalid(message) => formatter.write_str(message),
         }
@@ -71,10 +74,15 @@ pub fn is_project_path(path: &Path) -> bool {
 
 pub fn encode_project(document: &Document) -> Result<Vec<u8>, ProjectError> {
     validate_document(document)?;
+
+    let mut snapshot = document.clone();
+    snapshot.file_path = None;
+    snapshot.has_unsaved_changes = false;
+
     let project = ProjectFile {
         format: PROJECT_FORMAT.to_string(),
         version: PROJECT_VERSION,
-        document: document.clone(),
+        document: snapshot,
     };
     Ok(serde_json::to_vec_pretty(&project)?)
 }
@@ -97,6 +105,7 @@ pub fn decode_project(bytes: &[u8]) -> Result<Document, ProjectError> {
 
     validate_document(&project.document)?;
     let mut document = project.document;
+    document.file_path = None;
     document.undo_stack = UndoStack::new();
     document.has_unsaved_changes = false;
     Ok(document)
@@ -138,7 +147,11 @@ fn temporary_path_for(path: &Path) -> PathBuf {
     path.with_file_name(format!(".{file_name}.tmp"))
 }
 
-fn checked_pixel_len(width: u32, height: u32, channels: usize) -> Result<usize, ProjectError> {
+fn checked_pixel_len(
+    width: u32,
+    height: u32,
+    channels: usize,
+) -> Result<usize, ProjectError> {
     if width == 0 || height == 0 || width > MAX_DIMENSION || height > MAX_DIMENSION {
         return Err(ProjectError::Invalid(format!(
             "Invalid pixel dimensions {width}x{height}"
@@ -147,7 +160,9 @@ fn checked_pixel_len(width: u32, height: u32, channels: usize) -> Result<usize, 
     (width as usize)
         .checked_mul(height as usize)
         .and_then(|pixels| pixels.checked_mul(channels))
-        .ok_or_else(|| ProjectError::Invalid("Pixel dimensions overflow memory limits".to_string()))
+        .ok_or_else(|| {
+            ProjectError::Invalid("Pixel dimensions overflow memory limits".to_string())
+        })
 }
 
 fn validate_document(document: &Document) -> Result<(), ProjectError> {
@@ -235,7 +250,8 @@ mod tests {
 
     #[test]
     fn project_round_trip_preserves_layers_and_resets_runtime_state() {
-        let document = sample_document();
+        let mut document = sample_document();
+        document.file_path = Some("/home/example/private-source.png".to_string());
         let encoded = encode_project(&document).expect("encode project");
         let decoded = decode_project(&encoded).expect("decode project");
 
@@ -243,8 +259,12 @@ mod tests {
         assert_eq!(decoded.canvas_height, 2);
         assert_eq!(decoded.layers.len(), 1);
         assert_eq!(decoded.layers[0].name, "Pixels");
+        assert_eq!(decoded.file_path, None);
         assert!(!decoded.has_unsaved_changes);
         assert!(!decoded.undo_stack.can_undo());
+        assert!(!String::from_utf8(encoded)
+            .unwrap()
+            .contains("private-source.png"));
     }
 
     #[test]
