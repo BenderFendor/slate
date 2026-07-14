@@ -27,9 +27,18 @@ jobs:
         with:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
-      - name: Format
-        run: cargo fmt --check
+      - name: Apply rustfmt in the runner
+        run: cargo fmt --all
+      - name: Preserve formatted source
+        uses: actions/upload-artifact@v4
+        with:
+          name: rustfmt-source
+          path: src
+          if-no-files-found: error
       - name: Test
         run: cargo test --all-targets --all-features --locked
       - name: Clippy
         run: cargo clippy --all-targets --all-features --locked -- -D warnings
+      - name: Verify committed formatting
+        if: always()
+        run: git diff --exit-code -- '*.rs'
