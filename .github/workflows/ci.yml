@@ -5,7 +5,7 @@ on:
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify:
@@ -30,28 +30,18 @@ jobs:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
       - name: Apply compiler-driven source repairs
-        if: github.actor != 'github-actions[bot]'
         run: python3 scripts/apply-source-fixes.py
       - name: Apply rustfmt in the runner
         run: cargo fmt --all
-      - name: Commit repaired source
-        if: github.actor != 'github-actions[bot]'
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src
-          if ! git diff --cached --quiet; then
-            git commit -m 'Fix native build and format source'
-            git push origin HEAD:agent/finish-slate-image-editor
-          fi
-      - name: Preserve formatted source
+      - name: Preserve repaired source
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: rustfmt-source
+          name: repaired-rust-source
           path: src
           if-no-files-found: error
       - name: Test
-        id: test
+        if: always()
         shell: bash
         run: |
           set -o pipefail
